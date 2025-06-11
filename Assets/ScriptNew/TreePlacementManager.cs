@@ -50,6 +50,7 @@ public class TreePlacementManager : MonoBehaviour
 
     private void Start()
     {
+        
         // Get reference to SpawnController
         spawnController = FindObjectOfType<SpawnController>();
 

@@ -17,7 +17,6 @@ public class SimpleLineController : MonoBehaviour
             Debug.LogWarning("Turtle GameObject is not assigned in the inspector.");
         }
 
-
     }
     
     private void Awake()

@@ -6,12 +6,13 @@ public class FieldOfViewController : MonoBehaviour
     [Header("FOV Settings")]
     public float viewDistance = 5f;
     public float viewAngle = 60f;
+    [Range(5, 50)]
     public int rayCount = 20;
     public Color fovColor = Color.red;
 
     private LineRenderer lineRenderer;
     private bool showFOV = true;
-    public static bool GlobalFOVEnabled = true;
+    public static bool GlobalFOVEnabled = false;
 
     private void Awake()
     {
@@ -19,19 +20,19 @@ public class FieldOfViewController : MonoBehaviour
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
         lineRenderer.startWidth = 0.05f;
         lineRenderer.endWidth = 0.05f;
-        lineRenderer.positionCount = rayCount + 1;
         lineRenderer.useWorldSpace = true;
+        lineRenderer.loop = true;
         SetColor(fovColor);
-
-        Debug.Log($"FOV Controller initialized for {gameObject.name}");
+        lineRenderer.enabled = false;
+        Debug.Log($"FOV Controller initialized for {gameObject.name} - Ray count: {rayCount}");
     }
 
     private void Update()
     {
-        if (!FieldOfViewController.GlobalFOVEnabled)
+        if (!GlobalFOVEnabled)
         {
             lineRenderer.enabled = false;
-            return; 
+            return;
         }
 
         if (showFOV)
@@ -45,50 +46,13 @@ public class FieldOfViewController : MonoBehaviour
         }
     }
 
-    public void ToggleFOV()
-    {
-        showFOV = !showFOV;
-        UpdateVisibility();
-        Debug.Log($"FOV toggled for {gameObject.name}: {(showFOV ? "ON" : "OFF")}");
-    }
-
-    public void SetFOVVisible(bool visible)
-    {
-        showFOV = visible;
-        UpdateVisibility();
-        Debug.Log($"FOV set to {(visible ? "visible" : "hidden")} for {gameObject.name}");
-    }
-
-    private void UpdateVisibility()
-    {
-        if (GlobalFOVEnabled && showFOV)
-        {
-            lineRenderer.enabled = true;
-        }
-        else
-        {
-            lineRenderer.enabled = false;
-        }
-    }
-
-    public bool IsVisible()
-    {
-        return GlobalFOVEnabled && showFOV && (lineRenderer != null && lineRenderer.enabled);
-    }
-
-    public void SetColor(Color color)
-    {
-        fovColor = color;
-        lineRenderer.startColor = color;
-        lineRenderer.endColor = color;
-    }
-
     private void UpdateFieldOfView()
     {
-        float angleStep = viewAngle / rayCount;
-        float startAngle = -viewAngle / 2;
-        Vector3[] points = new Vector3[rayCount + 1];
+        Vector3[] points = new Vector3[rayCount + 2];
         points[0] = transform.position;
+
+        float angleStep = viewAngle / (rayCount - 1);
+        float startAngle = -viewAngle / 2;
 
         for (int i = 0; i < rayCount; i++)
         {
@@ -104,20 +68,47 @@ public class FieldOfViewController : MonoBehaviour
             points[i + 1] = endPoint;
         }
 
+        points[rayCount + 1] = transform.position;
+
         lineRenderer.positionCount = points.Length;
         lineRenderer.SetPositions(points);
+
+        Debug.Log($"FOV updated for {gameObject.name} - Points: {points.Length}, RayCount: {rayCount}");
     }
 
-    public static void SetGlobalFOVEnabled(bool enabled)
+    public void ToggleFOV()
     {
-        GlobalFOVEnabled = enabled;
-        Debug.Log($"Global FOV set to: {enabled}");
+        showFOV = !showFOV;
+        Debug.Log($"FOV toggled for {gameObject.name}: {(showFOV ? "ON" : "OFF")}");
+    }
 
-        // 立即更新所有現存的 FOV
-        FieldOfViewController[] allFOVs = FindObjectsOfType<FieldOfViewController>();
-        foreach (FieldOfViewController fov in allFOVs)
+    public void SetFOVVisible(bool visible)
+    {
+        showFOV = visible;
+        Debug.Log($"FOV set to {(visible ? "visible" : "hidden")} for {gameObject.name}");
+    }
+
+    public void SetColor(Color color)
+    {
+        fovColor = color;
+        if (lineRenderer != null)
         {
-            fov.UpdateVisibility();
+            lineRenderer.startColor = color;
+            lineRenderer.endColor = color;
         }
+    }
+
+    [ContextMenu("Increase Ray Count")]
+    public void IncreaseRayCount()
+    {
+        rayCount = Mathf.Min(rayCount + 5, 50);
+        Debug.Log($"Ray count increased to: {rayCount}");
+    }
+
+    [ContextMenu("Decrease Ray Count")]
+    public void DecreaseRayCount()
+    {
+        rayCount = Mathf.Max(rayCount - 5, 5);
+        Debug.Log($"Ray count decreased to: {rayCount}");
     }
 }
