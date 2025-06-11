@@ -51,5 +51,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "AR-Project-ACG-Part2.sln"
+    "dotnet.defaultSolution": "TurtleRabbit.sln"
 }

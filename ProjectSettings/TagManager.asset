@@ -9,6 +9,7 @@ TagManager:
   - Bird
   - Pitcher
   - NPC
+  - Tree
   layers:
   - Default
   - TransparentFX
@@ -16,7 +17,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Tree Layer
   - 
   - 
   - 
